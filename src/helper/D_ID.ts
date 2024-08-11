@@ -2,7 +2,7 @@
 // 1. Import the Agents SDK library
 
 import "../style.css";
-// import * as sdk from "@d-id/client-sdk";
+import * as sdk from "@d-id/client-sdk";
 // 2. Paste the `data-agent-id' in the 'agentId' variable
 import DID_API from "../api.json";
 import axios from "axios";
@@ -359,21 +359,21 @@ export const HelperClientD_ID = () => {
       return;
     }
 
-    // // WEBRTC API CALL 2 - Start a stream
-    // const sdpResponse = await fetch(
-    //   `${DID_API.url}/${DID_API.service}/streams/${streamId}/sdp`,
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       Authorization: `Basic ${DID_API.key}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       answer: sessionClientAnswer,
-    //       session_id: sessionId,
-    //     }),
-    //   }
-    // );
+    // WEBRTC API CALL 2 - Start a stream
+    const sdpResponse = await fetch(
+      `${DID_API.url}/${DID_API.service}/streams/${streamId}/sdp`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${DID_API.key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answer: sessionClientAnswer,
+          session_id: sessionId,
+        }),
+      }
+    );
   };
 
   const startButton: any = document.getElementById("start-button");
