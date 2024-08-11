@@ -1,5 +1,6 @@
 import "regenerator-runtime/runtime";
 import { useEffect, useLayoutEffect, useState } from "react";
+import React, { useRef } from "react";
 import "./style.css";
 import { HelperClientD_ID } from "./helper";
 import SpeechRecognition, {
@@ -12,7 +13,7 @@ function App() {
   }, []);
 
   const { transcript, listening } = useSpeechRecognition();
-
+  const textAreaRef = useRef(null);
   const [isListening, setIsListening] = useState(false);
   const [textAreaValue, setTextAreaValue] = useState("");
 
@@ -108,6 +109,7 @@ function App() {
               id="textArea"
               value={textAreaValue}
               onChange={handleChange}
+              ref={textAreaRef}
             ></textarea>
             <br />
             <div

@@ -7,7 +7,6 @@ import * as sdk from "@d-id/client-sdk";
 import DID_API from "../api.json";
 import video from "../assets/emma_idle.mp4";
 import axios from "axios";
-
 export const HelperClientD_ID = () => {
   if (DID_API.key == "🤫")
     alert("Please put your api key inside ./api.json and restart..");
@@ -380,6 +379,7 @@ export const HelperClientD_ID = () => {
   const startButton: any = document.getElementById("start-button");
   startButton.onclick = async () => {
     // connectionState not supported in firefox
+
     if (
       peerConnection?.signalingState === "stable" ||
       peerConnection?.iceConnectionState === "connected"
@@ -391,7 +391,6 @@ export const HelperClientD_ID = () => {
       let txtAreaValue: any = textArea.value;
 
       // Clearing the text-box element
-
       textArea.value = "";
 
       // Agents Overview - Step 3: Send a Message to a Chat session - Send a message to a Chat
