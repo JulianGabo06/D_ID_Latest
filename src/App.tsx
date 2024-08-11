@@ -86,7 +86,7 @@ function App() {
               <button id="start-button" type="button">
                 Send
               </button>
-              <button id="micButton">Mic</button>
+              {/* <button id="micButton">Mic</button> */}
             </div>
           </div>
           <div className="chat">
