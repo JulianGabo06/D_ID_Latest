@@ -2,22 +2,16 @@
 // 1. Import the Agents SDK library
 
 import "../style.css";
-import * as sdk from "@d-id/client-sdk";
+// import * as sdk from "@d-id/client-sdk";
 // 2. Paste the `data-agent-id' in the 'agentId' variable
 import DID_API from "../api.json";
 import axios from "axios";
 
 export const HelperClientD_ID = () => {
-  "use strict";
-
   if (DID_API.key == "🤫")
     alert("Please put your api key inside ./api.json and restart..");
 
-  const RTCPeerConnection = (
-    window.RTCPeerConnection ||
-    window.webkitRTCPeerConnection ||
-    window.mozRTCPeerConnection
-  ).bind(window);
+  const RTCPeerConnection = window.RTCPeerConnection.bind(window);
 
   let peerConnection: any;
   let streamId: any;
@@ -30,6 +24,7 @@ export const HelperClientD_ID = () => {
   let chatId: any;
 
   const videoElement: any = document.getElementById("video-element");
+  const msgHistoryElement: any = document.getElementById("msgHistory");
   videoElement.setAttribute("playsinline", "");
   const peerStatusLabel: any = document.getElementById("peer-status-label");
   const iceStatusLabel: any = document.getElementById("ice-status-label");
@@ -47,7 +42,7 @@ export const HelperClientD_ID = () => {
   const textArea: any = document.getElementById("textArea");
 
   // Play the idle video when the page is loaded
-  window.onload = (event) => {
+  window.onload = () => {
     playIdleVideo();
 
     if (agentId == "" || agentId == undefined) {
@@ -65,7 +60,7 @@ export const HelperClientD_ID = () => {
       chatIdLabel.innerHTML = chatId;
     }
   };
-  async function createPeerConnection(offer, iceServers) {
+  async function createPeerConnection(offer: any, iceServers: any) {
     if (!peerConnection) {
       peerConnection = new RTCPeerConnection({ iceServers });
       peerConnection.addEventListener(
@@ -107,9 +102,9 @@ export const HelperClientD_ID = () => {
       console.log("datachannel open");
     };
 
-    let decodedMsg;
+    let decodedMsg: any;
     // Agent Text Responses - Decoding the responses, pasting to the HTML element
-    dc.onmessage = (event) => {
+    dc.onmessage = (event: any) => {
       let msg = event.data;
       let msgType = "chat/answer:";
       if (msg.includes(msgType)) {
@@ -120,9 +115,7 @@ export const HelperClientD_ID = () => {
       }
       if (msg.includes("stream/started")) {
         console.log(msg);
-        document.getElementById(
-          "msgHistory"
-        ).innerHTML += `<span>${decodedMsg}</span><br><br>`;
+        msgHistoryElement.innerHTML += `<span>${decodedMsg}</span><br><br>`;
       } else {
         console.log(msg);
       }
@@ -139,7 +132,7 @@ export const HelperClientD_ID = () => {
     iceGatheringStatusLabel.className =
       "iceGatheringState-" + peerConnection.iceGatheringState;
   }
-  function onIceCandidate(event) {
+  function onIceCandidate(event: any) {
     if (event.candidate) {
       const { candidate, sdpMid, sdpMLineIndex } = event.candidate;
 
@@ -181,7 +174,7 @@ export const HelperClientD_ID = () => {
     signalingStatusLabel.className =
       "signalingState-" + peerConnection.signalingState;
   }
-  function onVideoStatusChange(videoIsPlaying, stream) {
+  function onVideoStatusChange(videoIsPlaying: any, stream: any) {
     let status;
     if (videoIsPlaying) {
       status = "streaming";
@@ -195,7 +188,7 @@ export const HelperClientD_ID = () => {
     streamingStatusLabel.innerText = status;
     streamingStatusLabel.className = "streamingState-" + status;
   }
-  function onTrack(event) {
+  function onTrack(event: any) {
     /**
      * The following code is designed to provide information about wether currently there is data
      * that's being streamed - It does so by periodically looking for changes in total stream data size
@@ -210,7 +203,7 @@ export const HelperClientD_ID = () => {
 
     statsIntervalId = setInterval(async () => {
       const stats = await peerConnection.getStats(event.track);
-      stats.forEach((report) => {
+      stats.forEach((report: any) => {
         if (report.type === "inbound-rtp" && report.kind === "video") {
           const videoStatusChanged =
             videoIsPlaying !== report.bytesReceived > lastBytesReceived;
@@ -256,7 +249,7 @@ export const HelperClientD_ID = () => {
   function stopAllStreams() {
     if (videoElement.srcObject) {
       console.log("stopping video streams");
-      videoElement.srcObject.getTracks().forEach((track) => track.stop());
+      videoElement.srcObject.getTracks().forEach((track: any) => track.stop());
       videoElement.srcObject = null;
     }
   }
@@ -298,7 +291,7 @@ export const HelperClientD_ID = () => {
   }
   const maxRetryCount = 3;
   const maxDelaySec = 4;
-  async function fetchWithRetries(url, options, retries = 1) {
+  async function fetchWithRetries(url: any, options: any, retries = 1) {
     try {
       return await fetch(url, options);
     } catch (err) {
@@ -319,7 +312,7 @@ export const HelperClientD_ID = () => {
     }
   }
 
-  const connectButton = document.getElementById("connect-button");
+  const connectButton: any = document.getElementById("connect-button");
   connectButton.onclick = async () => {
     if (agentId == "" || agentId === undefined) {
       return alert(
@@ -366,24 +359,24 @@ export const HelperClientD_ID = () => {
       return;
     }
 
-    // WEBRTC API CALL 2 - Start a stream
-    const sdpResponse = await fetch(
-      `${DID_API.url}/${DID_API.service}/streams/${streamId}/sdp`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${DID_API.key}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          answer: sessionClientAnswer,
-          session_id: sessionId,
-        }),
-      }
-    );
+    // // WEBRTC API CALL 2 - Start a stream
+    // const sdpResponse = await fetch(
+    //   `${DID_API.url}/${DID_API.service}/streams/${streamId}/sdp`,
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       Authorization: `Basic ${DID_API.key}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       answer: sessionClientAnswer,
+    //       session_id: sessionId,
+    //     }),
+    //   }
+    // );
   };
 
-  const startButton = document.getElementById("start-button");
+  const startButton: any = document.getElementById("start-button");
   startButton.onclick = async () => {
     // connectionState not supported in firefox
     if (
@@ -391,15 +384,14 @@ export const HelperClientD_ID = () => {
       peerConnection?.iceConnectionState === "connected"
     ) {
       // Pasting the user's message to the Chat History element
-      document.getElementById(
-        "msgHistory"
-      ).innerHTML += `<span style='opacity:0.5'><u>User:</u> ${textArea.value}</span><br>`;
+      msgHistoryElement.innerHTML += `<span style='opacity:0.5'><u>User:</u> ${textArea.value}</span><br>`;
 
       // Storing the Text Area value
-      let txtAreaValue = document.getElementById("textArea").value;
+      let txtAreaValue: any = textArea.value;
 
       // Clearing the text-box element
-      document.getElementById("textArea").value = "";
+
+      textArea.value = "";
 
       // Agents Overview - Step 3: Send a Message to a Chat session - Send a message to a Chat
       const playResponse = await fetchWithRetries(
@@ -429,14 +421,12 @@ export const HelperClientD_ID = () => {
         playResponseData.chatMode === "TextOnly"
       ) {
         console.log("User is out of credit, API only return text messages");
-        document.getElementById(
-          "msgHistory"
-        ).innerHTML += `<span style='opacity:0.5'> ${playResponseData.result}</span><br>`;
+        msgHistoryElement.innerHTML += `<span style='opacity:0.5'> ${playResponseData.result}</span><br>`;
       }
     }
   };
 
-  const destroyButton = document.getElementById("destroy-button");
+  const destroyButton: any = document.getElementById("destroy-button");
   destroyButton.onclick = async () => {
     await fetch(`${DID_API.url}/${DID_API.service}/streams/${streamId}`, {
       method: "DELETE",
@@ -461,7 +451,7 @@ export const HelperClientD_ID = () => {
 
     // Retry Mechanism (Polling) for this demo only - Please use Webhooks in real life applications!
     // as described in https://docs.d-id.com/reference/knowledge-overview#%EF%B8%8F-step-2-add-documents-to-the-knowledge-base
-    async function retry(url, retries = 1) {
+    async function retry(url: any, retries = 1) {
       const maxRetryCount = 5; // Maximum number of retries
       const maxDelaySec = 10; // Maximum delay in seconds
       try {
@@ -580,7 +570,7 @@ export const HelperClientD_ID = () => {
     return { agentId: agentId, chatId: chatId };
   }
 
-  const agentsButton = document.getElementById("agents-button");
+  const agentsButton: any = document.getElementById("agents-button");
   agentsButton.onclick = async () => {
     try {
       const agentsIds = ({} = await agentsAPIworkflow());
@@ -588,7 +578,7 @@ export const HelperClientD_ID = () => {
       agentId = agentsIds.agentId;
       chatId = agentsIds.chatId;
       return;
-    } catch (err) {
+    } catch (err: any) {
       agentIdLabel.innerHTML = `<span style='color:red'>Failed</span>`;
       chatIdLabel.innerHTML = `<span style='color:red'>Failed</span>`;
       throw new Error(err);
@@ -599,50 +589,50 @@ export const HelperClientD_ID = () => {
   agentId = "";
   chatId = "";
 
-  const micButton = document.getElementById("micButton");
+  // const micButton: any = document.getElementById("micButton");
 
-  let recognition;
-  let isRecognitionActive = false;
+  // let recognition: any;
+  // let isRecognitionActive = false;
 
-  if ("webkitSpeechRecognition" in window) {
-    recognition = new webkitSpeechRecognition();
-    recognition.continuous = true; // Permite resultados parciales mientras el usuario habla
-    recognition.interimResults = true; // Habilita resultados intermedios
-    recognition.lang = "en-US"; // Cambia esto según el idioma deseado
+  // if ("webkitSpeechRecognition" in window) {
+  //   recognition = new webkitSpeechRecognition();
+  //   recognition.continuous = true; // Permite resultados parciales mientras el usuario habla
+  //   recognition.interimResults = true; // Habilita resultados intermedios
+  //   recognition.lang = "en-US"; // Cambia esto según el idioma deseado
 
-    micButton.addEventListener("click", () => {
-      if (!isRecognitionActive) {
-        startRecognition();
-      } else {
-        stopRecognition();
-      }
-    });
+  //   micButton.addEventListener("click", () => {
+  //     if (!isRecognitionActive) {
+  //       startRecognition();
+  //     } else {
+  //       stopRecognition();
+  //     }
+  //   });
 
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map((result) => result[0])
-        .map((result) => result.transcript)
-        .join("");
-      textArea.value = transcript; // Actualiza el área de texto con el transcript
-    };
+  //   recognition.onresult = (event: any) => {
+  //     const transcript = Array.from(event.results)
+  //       .map((result: any) => result[0])
+  //       .map((result) => result.transcript)
+  //       .join("");
+  //     textArea.value = transcript; // Actualiza el área de texto con el transcript
+  //   };
 
-    recognition.onend = () => {
-      stopRecognition(); // Detiene el reconocimiento cuando se dispara el evento onend
-    };
+  //   recognition.onend = () => {
+  //     stopRecognition(); // Detiene el reconocimiento cuando se dispara el evento onend
+  //   };
 
-    function startRecognition() {
-      recognition.start();
-      micButton.textContent = "Stop Dictation";
-      isRecognitionActive = true;
-    }
+  //   function startRecognition() {
+  //     recognition.start();
+  //     micButton.textContent = "Stop Dictation";
+  //     isRecognitionActive = true;
+  //   }
 
-    function stopRecognition() {
-      recognition.stop();
-      micButton.textContent = "Start Dictation";
-      isRecognitionActive = false;
-    }
-  } else {
-    micButton.disabled = true;
-    micButton.textContent = "Voice Recognition Not Supported";
-  }
+  //   function stopRecognition() {
+  //     recognition.stop();
+  //     micButton.textContent = "Start Dictation";
+  //     isRecognitionActive = false;
+  //   }
+  // } else {
+  //   micButton.disabled = true;
+  //   micButton.textContent = "Voice Recognition Not Supported";
+  // }
 };
