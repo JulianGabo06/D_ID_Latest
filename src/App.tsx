@@ -1,11 +1,42 @@
-import { useLayoutEffect } from "react";
+import "regenerator-runtime/runtime";
+import { useEffect, useLayoutEffect, useState } from "react";
 import "./style.css";
 import { HelperClientD_ID } from "./helper";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 function App() {
   useLayoutEffect(() => {
     HelperClientD_ID();
   }, []);
+
+  const { transcript, listening } = useSpeechRecognition();
+
+  const [isListening, setIsListening] = useState(false);
+  const [textAreaValue, setTextAreaValue] = useState("");
+
+  useEffect(() => {
+    // Actualiza el estado del área de texto basado en el transcript solo cuando el reconocimiento de voz está activo
+    if (listening) {
+      setTextAreaValue(transcript);
+    }
+  }, [transcript, listening]);
+
+  const handleMicClick = () => {
+    setIsListening(!isListening);
+    if (!isListening) {
+      SpeechRecognition.startListening({ continuous: true });
+    } else {
+      SpeechRecognition.stopListening();
+    }
+  };
+
+  const handleChange = (event: any) => {
+    // Actualiza el estado del área de texto basado en la entrada del usuario
+    setTextAreaValue(event.target.value);
+  };
+
   return (
     <>
       <div id="content">
@@ -73,7 +104,11 @@ function App() {
             }}
           >
             <h3>Type your message here:</h3>
-            <textarea id="textArea"></textarea>
+            <textarea
+              id="textArea"
+              value={textAreaValue}
+              onChange={handleChange}
+            ></textarea>
             <br />
             <div
               style={{
@@ -86,8 +121,8 @@ function App() {
               <button id="start-button" type="button">
                 Send
               </button>
-              <button id="micButton" style={{ display: "none" }}>
-                Mic
+              <button id="micButton" onClick={handleMicClick}>
+                Mic {isListening ? "Off" : "On"}
               </button>
             </div>
           </div>
