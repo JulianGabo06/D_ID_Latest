@@ -5,6 +5,7 @@ import "../style.css";
 import * as sdk from "@d-id/client-sdk";
 // 2. Paste the `data-agent-id' in the 'agentId' variable
 import DID_API from "../api.json";
+import video from "../assets/emma_idle.mp4";
 import axios from "axios";
 
 export const HelperClientD_ID = () => {
@@ -238,7 +239,7 @@ export const HelperClientD_ID = () => {
     videoElement.classList.toggle("animated");
 
     videoElement.srcObject = undefined;
-    videoElement.src = "emma_idle.mp4";
+    videoElement.src = video;
     videoElement.loop = true;
 
     // Remove Animation Class after it's completed
