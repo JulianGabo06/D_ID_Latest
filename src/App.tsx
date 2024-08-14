@@ -15,7 +15,7 @@ function App() {
       element: <Develop />,
     },
     {
-      path: "demo",
+      path: "/demo",
       element: <Demo />,
     },
   ]);
