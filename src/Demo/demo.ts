@@ -1,6 +1,5 @@
 // CSS import
 // 1. Import the Agents SDK library
-
 import "../style.css";
 import * as sdk from "@d-id/client-sdk";
 // 2. Paste the `data-agent-id' in the 'agentId' variable
@@ -22,8 +21,12 @@ export const DemoClientD_ID = () => {
   let lastBytesReceived: any;
   let agentId: any;
   let chatId: any;
+  let recognizing: any;
+  let recognition: any;
+  let recognizedText: any = "";
 
   const videoElement: any = document.getElementById("video-element");
+  const speechButton: any = document.getElementById("micButton");
   const msgHistoryElement: any = document.getElementById("msgHistory");
   videoElement.setAttribute("playsinline", "");
   const peerStatusLabel: any = document.getElementById("peer-status-label");
@@ -44,21 +47,6 @@ export const DemoClientD_ID = () => {
   // Play the idle video when the page is loaded
   window.onload = () => {
     playIdleVideo();
-
-    if (agentId == "" || agentId == undefined) {
-      console.log(
-        "Empty 'agentID' and 'chatID' variables\n\n1. Click on the 'Create new Agent with Knowledge' button\n2. Open the Console and wait for the process to complete\n3. Press on the 'Connect' button\n4. Type and send a message to the chat\nNOTE: You can store the created 'agentID' and 'chatId' variables at the bottom of the JS file for future chats"
-      );
-    } else {
-      console.log(
-        "You are good to go!\nClick on the 'Connect Button', Then send a new message\nAgent ID: ",
-        agentId,
-        "\nChat ID: ",
-        chatId
-      );
-      agentIdLabel.innerHTML = agentId;
-      chatIdLabel.innerHTML = chatId;
-    }
   };
   async function createPeerConnection(offer: any, iceServers: any) {
     if (!peerConnection) {
@@ -245,49 +233,6 @@ export const DemoClientD_ID = () => {
       videoElement.classList.remove("animated");
     }, 1000);
   }
-  function stopAllStreams() {
-    if (videoElement.srcObject) {
-      console.log("stopping video streams");
-      videoElement.srcObject.getTracks().forEach((track: any) => track.stop());
-      videoElement.srcObject = null;
-    }
-  }
-  function closePC(pc = peerConnection) {
-    if (!pc) return;
-    console.log("stopping peer connection");
-    pc.close();
-    pc.removeEventListener(
-      "icegatheringstatechange",
-      onIceGatheringStateChange,
-      true
-    );
-    pc.removeEventListener("icecandidate", onIceCandidate, true);
-    pc.removeEventListener(
-      "iceconnectionstatechange",
-      onIceConnectionStateChange,
-      true
-    );
-    pc.removeEventListener(
-      "connectionstatechange",
-      onConnectionStateChange,
-      true
-    );
-    pc.removeEventListener(
-      "signalingstatechange",
-      onSignalingStateChange,
-      true
-    );
-    pc.removeEventListener("track", onTrack, true);
-    clearInterval(statsIntervalId);
-    iceGatheringStatusLabel.innerText = "";
-    signalingStatusLabel.innerText = "";
-    iceStatusLabel.innerText = "";
-    peerStatusLabel.innerText = "";
-    console.log("stopped peer connection");
-    if (pc === peerConnection) {
-      peerConnection = null;
-    }
-  }
   const maxRetryCount = 3;
   const maxDelaySec = 4;
   async function fetchWithRetries(url: any, options: any, retries = 1) {
@@ -311,7 +256,7 @@ export const DemoClientD_ID = () => {
     }
   }
 
-  const connectButton: any = document.getElementById("connect-button");
+  // const connectButton: any = document.getElementById("connect-button");
 
   const ConectRTC = async () => {
     if (agentId == "" || agentId === undefined) {
@@ -376,73 +321,6 @@ export const DemoClientD_ID = () => {
     );
   };
 
-  const startButton: any = document.getElementById("start-button");
-  startButton.onclick = async () => {
-    // connectionState not supported in firefox
-
-    if (
-      peerConnection?.signalingState === "stable" ||
-      peerConnection?.iceConnectionState === "connected"
-    ) {
-      // Pasting the user's message to the Chat History element
-      msgHistoryElement.innerHTML += `<span style='opacity:0.5'><u>User:</u> ${textArea.value}</span><br>`;
-
-      // Storing the Text Area value
-      let txtAreaValue: any = textArea.value;
-
-      // Clearing the text-box element
-      textArea.value = "";
-
-      // Agents Overview - Step 3: Send a Message to a Chat session - Send a message to a Chat
-      const playResponse = await fetch(
-        `${DID_API.url}/agents/${agentId}/chat/${chatId}`,
-        {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-            Authorization: `Basic ${DID_API.key}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chatMode: "Functional",
-            streamId: streamId,
-            sessionId: sessionId,
-            messages: [
-              {
-                role: "user",
-                content: txtAreaValue,
-                created_at: new Date().toString(),
-              },
-            ],
-          }),
-        }
-      );
-      const playResponseData = await playResponse.json();
-      if (
-        playResponse.status === 200 &&
-        playResponseData.chatMode === "TextOnly"
-      ) {
-        console.log("User is out of credit, API only return text messages");
-        msgHistoryElement.innerHTML += `<span style='opacity:0.5'> ${playResponseData.result}</span><br>`;
-      }
-    }
-  };
-
-  const destroyButton: any = document.getElementById("destroy-button");
-  destroyButton.onclick = async () => {
-    await fetch(`${DID_API.url}/${DID_API.service}/streams/${streamId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Basic ${DID_API.key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ session_id: sessionId }),
-    });
-
-    stopAllStreams();
-    closePC();
-  };
-
   // Agents API Workflow
   async function agentsAPIworkflow() {
     axios.defaults.baseURL = `${DID_API.url}`;
@@ -495,4 +373,93 @@ export const DemoClientD_ID = () => {
   // Paste Your Created Agent and Chat IDs Here:
   agentId = "";
   chatId = "";
+
+  //Microfone
+
+  if (navigator.userAgent.includes("Firefox")) {
+    recognition = new SpeechRecognition();
+  } else {
+    recognition = new webkitSpeechRecognition();
+  }
+  // recognition.lang = langSelect.value;
+  recognition.continuous = true;
+  reset();
+  recognition.onend = reset;
+
+  recognition.onresult = function (event: any) {
+    console.log(event);
+    for (var i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        console.log("Texto reconocido:", event.results[i][0].transcript);
+        recognizedText = event.results[i][0].transcript;
+        sendMessage(recognizedText); // Call the function to send the recognized text as a message
+      }
+    }
+  };
+
+  function reset() {
+    recognizing = false;
+    speechButton.style.color = "White";
+    // speechButton.innerHTML = "&#127908;";
+    speechButton.innerHTML = `<span class="material-symbols-outlined">Mic</span>`;
+  }
+
+  async function toggleStartStop() {
+    console.log(recognizing);
+
+    if (recognizing) {
+      textArea.focus();
+      recognition.stop();
+      reset();
+    } else {
+      recognition.start();
+      recognizing = true;
+      speechButton.style.color = "red";
+      speechButton.innerHTML = "&#x23F9;";
+    }
+  }
+
+  async function sendMessage(message: any) {
+    if (recognizedText.trim()) {
+      // Check if the recognized text is not empty
+      // Pasting the user's message to the Chat History element
+      msgHistoryElement.innerHTML += `<span style='opacity:0.5'><u>User:</u> ${recognizedText}</span><br>`;
+
+      // Agents Overview - Step 2: Send a Message to a Chat session - Send a message to a Chat
+      const playResponse = await fetch(
+        `${DID_API.url}/agents/${agentId}/chat/${chatId}`,
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            Authorization: `Basic ${DID_API.key}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            append_chat: true,
+            chatMode: "Functional",
+            streamId: streamId,
+            sessionId: sessionId,
+            messages: [
+              {
+                role: "user",
+                content: message,
+                created_at: new Date().toString(),
+              },
+            ],
+          }),
+        }
+      );
+      const playResponseData = await playResponse.json();
+      if (
+        playResponse.status === 200 &&
+        playResponseData.chatMode === "TextOnly"
+      ) {
+        console.log("User is out of credit, API only return text messages");
+        msgHistoryElement.innerHTML += `<span style='opacity:0.5'> ${playResponseData.result}</span><br>`;
+      }
+    }
+  }
+
+  speechButton.addEventListener("click", () => toggleStartStop());
 };

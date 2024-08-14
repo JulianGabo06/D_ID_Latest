@@ -1,43 +1,11 @@
-import "regenerator-runtime/runtime";
-import { useEffect, useLayoutEffect, useState } from "react";
-import React, { useRef } from "react";
+import { useLayoutEffect } from "react";
 import "../style.css";
 import { DemoClientD_ID } from "./demo";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
 
 function Demo() {
   useLayoutEffect(() => {
     DemoClientD_ID();
   }, []);
-
-  const { transcript, listening, resetTranscript } = useSpeechRecognition();
-  const textAreaRef = useRef(null);
-  const [isListening, setIsListening] = useState(false);
-  const [textAreaValue, setTextAreaValue] = useState("");
-
-  useEffect(() => {
-    // Actualiza el estado del área de texto basado en el transcript solo cuando el reconocimiento de voz está activo
-    if (listening) {
-      setTextAreaValue(transcript);
-    }
-  }, [transcript, listening]);
-
-  const handleMicClick = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      resetTranscript();
-      SpeechRecognition.startListening({ continuous: true });
-    } else {
-      SpeechRecognition.stopListening();
-    }
-  };
-
-  const handleChange = (event: any) => {
-    // Actualiza el estado del área de texto basado en la entrada del usuario
-    setTextAreaValue(event.target.value);
-  };
 
   return (
     <>
@@ -62,9 +30,11 @@ function Demo() {
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <div>
-              Connect: <label id="ice-status-label"></label>
+              Connect: <label id="ice-status-label">Disconected</label>
             </div>
             <div>
+              <h3>Press the Init Talk button and then the Mic button</h3>
+
               <div style={{ display: "none" }}>
                 <h4>Agent Status</h4>
                 Agent ID: <label id="agentId-label"></label>
@@ -89,8 +59,9 @@ function Demo() {
 
               <div id="buttons">
                 <button id="agents-button" type="button">
-                  Init Chat
+                  Init Talk
                 </button>
+                <button id="micButton">&#127908; </button>
                 <div style={{ display: "none" }}>
                   <br />
                   <br />
@@ -116,13 +87,7 @@ function Demo() {
               textAlign: "center",
             }}
           >
-            <h3>Type your message here:</h3>
-            <textarea
-              id="textArea"
-              value={textAreaValue}
-              onChange={handleChange}
-              ref={textAreaRef}
-            ></textarea>
+            <textarea id="textArea" style={{ display: "none" }}></textarea>
             <br />
             <div
               style={{
@@ -132,17 +97,26 @@ function Demo() {
                 gap: "10px",
               }}
             >
-              <button id="start-button" type="button">
+              <button
+                id="start-button"
+                type="button"
+                style={{ display: "None" }}
+              >
                 Send
               </button>
-              <button id="micButton" onClick={handleMicClick}>
-                Mic {isListening ? "Off" : "On"}
-              </button>
+              <div id="micContainer">
+                <p id="micStatus" style={{ display: "none" }}>
+                  Microphone disabled
+                </p>
+              </div>
             </div>
           </div>
           <div className="chat">
             <h4 id="margin">Chat History</h4>
-            <div id="msgHistory"></div>
+            <div
+              id="msgHistory"
+              style={{ height: "300px", overflowY: "auto" }}
+            ></div>
           </div>
         </div>
       </div>
