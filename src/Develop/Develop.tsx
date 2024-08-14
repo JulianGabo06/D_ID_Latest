@@ -8,7 +8,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 
 function Develop() {
-  useLayoutEffect(() => {
+  useEffect(() => {
     HelperClientD_ID();
   }, []);
 

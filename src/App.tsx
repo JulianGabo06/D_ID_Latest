@@ -1,6 +1,5 @@
 import {
   BrowserRouter as Router,
-  Route,
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
