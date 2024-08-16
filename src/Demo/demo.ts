@@ -339,8 +339,6 @@ export const DemoClientD_ID = () => {
 
     const createChat = await axios.post(`/agents/${agentId}/chat`);
     console.log("Create Chat: ", createChat.data);
-    let chatId = createChat.data.id;
-    console.log("Chat ID: " + chatId);
 
     // Actualizar las etiquetas HTML con el agentId y chatId
     agentIdLabel.innerHTML = agentId;
@@ -371,8 +369,8 @@ export const DemoClientD_ID = () => {
   };
 
   // Paste Your Created Agent and Chat IDs Here:
-  agentId = "";
-  chatId = "";
+  agentId = "agt_rS6oQ11f";
+  chatId = "cht_Be8I63S9SZc2Vex5-XraB";
 
   //Microfone
 
